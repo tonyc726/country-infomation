@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	.flag{display: block; width: 16px; height: 11px; overflow: hidden; background: no-repeat url("./flags4.png") 0 0;}
+	.country-infomation-list{margin-bottom: 30px;}
+	#country_count{position:fixed; visibility: hidden; line-height: 30px; bottom: 0; left: 0; background-color: #666; color: #fff; margin:0; width: 100%; padding-left: 20px;}
+	</style>
+</head>
+<body>
+	<table class="country-infomation-list">
+		<thead>
+			<tr>
+				<th>Flag</th>
+				<th>Code</th>
+				<th>Name</th>
+				<th>AliasName</th>
+			</tr>
+		</thead>
+		<tbody id="country_template_container"></tbody>
+	</table>
+	<p id="country_count"></p>
+	<script src="./main.js"></script>
+	<script>
+		let countryTemplate = [];
+
+		countryInfomation.forEach((country)=>{
+		  let countryHash = countryInfomationHash[country['countryCode'].toLocaleLowerCase()];
+		  countryTemplate.push(`
+		  	  <tr>
+		      <td><span class="flag" style="background-position:0 ${countryHash?countryHash['c']:''}"></span></td>
+		      <td>${countryHash?countryHash['code']:''}</td>
+		      <td>${country['name']}</td>
+		      <td>${country['countryCode']}</td>
+		      </tr>
+		    `)
+		})
+
+		document.getElementById('country_template_container').innerHTML = countryTemplate.join('');
+		document.getElementById('country_count').innerHTML = `共有&nbsp;<strong>${countryTemplate.length}</strong>&nbsp;个国家`;
+		document.getElementById('country_count').style.visibility = 'visible';
+
+	</script>
+</body>
+</html>
