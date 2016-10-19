@@ -6,7 +6,7 @@
 	<style>
 	.flag{display: block; width: 16px; height: 11px; overflow: hidden; background: no-repeat url("./flags4.png") 0 0;}
 	.country-infomation-list{margin-bottom: 30px;}
-	#country_count{position:fixed; visibility: hidden; line-height: 30px; bottom: 0; left: 0; background-color: #666; color: #fff; margin:0; width: 100%; padding-left: 20px;}
+	.country-toolbar{position:fixed; line-height: 30px; bottom: 0; left: 0; background-color: #666; color: #fff; margin:0; width: 100%; padding-left: 20px;}
 	</style>
 </head>
 <body>
@@ -21,27 +21,89 @@
 		</thead>
 		<tbody id="country_template_container"></tbody>
 	</table>
-	<p id="country_count"></p>
+	<p class="country-toolbar">
+		共有&nbsp;<strong id="country_count">*</strong>&nbsp;个国家
+		<select name="" id="change_i18n">
+			<option value="CN" selected>中文</option>
+			<option value="EN">English</option>
+		</select>
+	</p>
 	<script src="./main.js"></script>
 	<script>
-		let countryTemplate = [];
+		const $COUNTRY_TEMPLATE_CONTAINER = document.getElementById('country_template_container');
+		const $COUNTRY_COUNT = document.getElementById('country_count');
+		const $CHANGE_LANG = document.getElementById('change_i18n');
 
-		countryInfomation.forEach((country)=>{
-		  let countryHash = countryInfomationHash[country['countryCode'].toLocaleLowerCase()];
-		  countryTemplate.push(`
-		  	  <tr>
-		      <td><span class="flag" style="background-position:0 ${countryHash?countryHash['c']:''}"></span></td>
-		      <td>${countryHash?countryHash['code']:''}</td>
-		      <td>${country['name']}</td>
-		      <td>${country['countryCode']}</td>
-		      </tr>
-		    `)
-		})
+		function renderCountryTemplate(lang) {
+			let countryInfomation = ((lang+'') === 'CN') ? countryInfomation_CN : ((lang+'') === 'EN') ? countryInfomation_EN : null;
 
-		document.getElementById('country_template_container').innerHTML = countryTemplate.join('');
-		document.getElementById('country_count').innerHTML = `共有&nbsp;<strong>${countryTemplate.length}</strong>&nbsp;个国家`;
-		document.getElementById('country_count').style.visibility = 'visible';
+			if (countryInfomation === null) {
+				alert('没有该语言的数据');
+				return false;
+			}
+			let countryTemplate = [];
 
+			countryInfomation.forEach((country)=>{
+			  let countryHash = countryInfomationHash[country['countryCode'].toLocaleLowerCase()];
+			  countryTemplate.push(`
+			  	  <tr>
+			      <td><span class="flag" style="background-position:0 ${countryHash?countryHash['c']:''}"></span></td>
+			      <td>${countryHash?countryHash['code']:''}</td>
+			      <td>${country['name']}</td>
+			      <td>${country['countryCode']}</td>
+			      </tr>
+			    `)
+			})
+
+			$COUNTRY_TEMPLATE_CONTAINER.innerHTML = countryTemplate.join('');
+			$COUNTRY_COUNT.innerHTML = `${countryTemplate.length}`;
+		}
+		
+
+		function addHandler (ele, evType, fn, useCapture) {
+	        // 默认使用事件冒泡
+	        useCapture = useCapture || false;
+	 
+	        if (ele.addEventListener) {
+	            ele.addEventListener(evType, fn, useCapture);
+	        } else if (ele.attachEvent) {
+	            ele.attachEvent("on" + evType, function () {
+	 
+	                // fn中的this指向ele对象:ie的问题
+	                fn.call(ele);  
+	            });
+	        } else {
+	            ele["on" + evType] = fn;
+	        }
+	    }
+
+	    function dispatchHandler (ele, evType, enableCapture, enableDefault) {
+	        // 默认禁用事件冒泡
+	        enableCapture = enableCapture || false;
+	        // 默认禁用浏览器的默认行为
+	        enableDefault = enableDefault || false;
+	 
+	        if (document.createEventObject){
+	            // IE浏览器支持fireEvent方法
+	            var evt = document.createEventObject();
+	            return ele.fireEvent('on'+evType, evt);
+	        }
+	        else{
+	            // 其他标准浏览器使用dispatchEvent方法
+	            var evt = document.createEvent( 'HTMLEvents' );
+	            // initEvent接受3个参数：
+	            // 事件类型，是否冒泡，是否阻止浏览器的默认行为
+	            evt.initEvent(evType, enableCapture, enableDefault); 
+	            return !ele.dispatchEvent(evt);
+	        }
+
+	    }
+
+	    addHandler($CHANGE_LANG, 'change', function() {
+	    	renderCountryTemplate(this.value)
+	    })
+
+	    dispatchHandler($CHANGE_LANG, 'change')
 	</script>
 </body>
 </html>
